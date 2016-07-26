@@ -107,21 +107,21 @@ resolutionsObj[5] = {
 init();
 
 function init() {
-	// fix warning popup
+	// Hide warning popup
 	app.displayDialogs = DialogModes.NO;
 
-	// save current ruler unit settings, so we can restore it
+	// Save current ruler unit settings, so we can restore it
 	var ru = app.preferences.rulerUnits;
 
-	// set ruler units to pixel to ensure scaling works as expected
+	// Set ruler units to pixel to ensure scaling works as expected
 	app.preferences.rulerUnits = Units.PIXELS;
 
-	// select export mode
+	// Select export mode
 	mode = selectMode();
 	if (mode == null)
 		return;
 
-	// select screen size of the psd file
+	// Select screen size of the psd file
 	size = selectSize();
 	if (size == null)
 		return;
@@ -139,7 +139,7 @@ function init() {
 		alert("Please save your document before running this script.");
 	}
 
-	// restore old ruler unit settings
+	// Restore old ruler unit settings
 	app.preferences.rulerUnits = ru;
 	alert("Export finished!");
 }
@@ -171,12 +171,12 @@ function selectSize() {
 function scanLayerSets(_activeLayer, _directory, _filename) {
 	// alert("Total subgroup = " + _activeLayer.layerSets.length);
 	if (_activeLayer.layerSets.length > 0) {
-		// recursive
+		// Recursive
 		for (var a = 0; a < _activeLayer.layerSets.length; a++) {
 			scanLayerSets(_activeLayer.layerSets[a], _directory + "/" + _filename, _activeLayer.layerSets[a].name);
 		}
 	} else {
-		// export active layer
+		// Export active layer
 		if (_activeLayer.visible)
 			saveFunc(_activeLayer, _directory, _filename);
 	}
@@ -186,14 +186,14 @@ function scanLayerSets(_activeLayer, _directory, _filename) {
 // http://2.adobe-photoshop-scripting.overzone.net/determine-if-file-has-never-been-saved-in-javascript-t264.html
 
 function isDocumentNew(doc) {
-	// assumes doc is the activeDocument
+	// Assumes doc is the activeDocument
 	cTID = function (s) {
 		return app.charIDToTypeID(s);
 	}
 	var ref = new ActionReference();
 	ref.putEnumerated(cTID("Dcmn"),
 		cTID("Ordn"),
-		cTID("Trgt")); //activeDoc
+		cTID("Trgt")); // ActiveDoc
 	var desc = executeActionGet(ref);
 	var rc = true;
 	if (desc.hasKey(cTID("FilR"))) { // FileReference
@@ -239,7 +239,6 @@ function resizeLayer(newWidth) {
 }
 
 function dupToNewFile(_activeLayer, includeInvisibleObject) {
-
 	if (includeInvisibleObject) {
 		var fileName = _activeLayer.name.replace(/\.[^\.]+$/, ''),
 		calcWidth = Math.ceil(_activeLayer.bounds[2] - _activeLayer.bounds[0]),
@@ -290,6 +289,7 @@ function saveFunc(_activeLayer, _directory, _filename) {
 	var tempDocName = _filename.replace(/\s+/g, '_').toLowerCase(); // Remove Space only and Lower Case
 
 	for (_resolution in resolutionsObj[size]) {
+		// Resize layer
 		resizeDoc(tempDoc, _resolution);
 
 		//var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution + "/" + _directory.replace(/\s+/g, '_').toLowerCase());
@@ -319,6 +319,7 @@ function saveFunc(_activeLayer, _directory, _filename) {
 		// Export the layer as a PNG
 		activeDocument.exportDocument(saveFile, ExportType.SAVEFORWEB, sfwOptions);
 
+		// History back 1 level (before resize)
 		tempDoc.activeHistoryState = tempDoc.historyStates[tempDoc.historyStates.length - 1];
 	}
 
