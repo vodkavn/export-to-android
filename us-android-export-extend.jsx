@@ -127,16 +127,14 @@ function init() {
 		return;
 
 	if (!isDocumentNew()) {
-		for (resolution in resolutionsObj[size]) {
-			//try {
-			if (mode == "2")
-				scanLayerSets(app.activeDocument, resolution, "", app.activeDocument.name); // export all
-			else if (mode == "1")
-				scanLayerSets(activeLayer, resolution, "", activeLayer.name); // export selected layer recursively
-			else
-				return;
-			//} catch (error) {}
-		}
+		//try {
+		if (mode == "2")
+			scanLayerSets(app.activeDocument, "", app.activeDocument.name); // export all
+		else if (mode == "1")
+			scanLayerSets(activeLayer, "", activeLayer.name); // export selected layer recursively
+		else
+			return;
+		//} catch (error) {}
 	} else {
 		alert("Please save your document before running this script.");
 	}
@@ -170,17 +168,17 @@ function selectSize() {
 	return s;
 }
 
-function scanLayerSets(_activeLayer, _resolution, _directory, _filename) {
+function scanLayerSets(_activeLayer, _directory, _filename) {
 	// alert("Total subgroup = " + _activeLayer.layerSets.length);
 	if (_activeLayer.layerSets.length > 0) {
 		// recursive
 		for (var a = 0; a < _activeLayer.layerSets.length; a++) {
-			scanLayerSets(_activeLayer.layerSets[a], _resolution, _directory + "/" + _filename, _activeLayer.layerSets[a].name);
+			scanLayerSets(_activeLayer.layerSets[a], _directory + "/" + _filename, _activeLayer.layerSets[a].name);
 		}
 	} else {
 		// export active layer
 		if (_activeLayer.visible)
-			saveFunc(_activeLayer, _resolution, _directory, _filename);
+			saveFunc(_activeLayer, _directory, _filename);
 	}
 }
 
@@ -219,7 +217,7 @@ function resizeDoc(document, resolution) {
 	resizeLayer(newWidth);
 
 	// Merge all layers inside the temp document
-	activeLayer2.merge();
+	//activeLayer2.merge();
 }
 
 // document.resizeImage doesn't seem to support scalestyles so we're using this workaround from http://ps-scripts.com/bb/viewtopic.php?p=14359
@@ -284,41 +282,45 @@ function dupToNewFile(_activeLayer, includeInvisibleObject) {
 	activeLayer2.translate(-activeLayer2.bounds[0], -activeLayer2.bounds[1]);
 }
 
-function saveFunc(_activeLayer, _resolution, _directory, _filename) {
+function saveFunc(_activeLayer, _directory, _filename) {
 	dupToNewFile(_activeLayer, false);
 
 	var tempDoc = app.activeDocument;
 
-	resizeDoc(tempDoc, _resolution);
-
 	var tempDocName = _filename.replace(/\s+/g, '_').toLowerCase(); // Remove Space only and Lower Case
 
-	//var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution + "/" + _directory.replace(/\s+/g, '_').toLowerCase());
-	var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution);
+	for (_resolution in resolutionsObj[size]) {
+		resizeDoc(tempDoc, _resolution);
 
-	if (!docFolder.exists) {
-		docFolder.create();
+		//var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution + "/" + _directory.replace(/\s+/g, '_').toLowerCase());
+		var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution);
+
+		if (!docFolder.exists) {
+			docFolder.create();
+		}
+
+		// alert(docFolder);
+
+		var saveFile = File(docFolder + "/" + tempDocName + ".png");
+		var i = 0;
+		while (saveFile.exists) {
+			i++;
+			saveFile = File(docFolder + "/" + tempDocName + "_" + i + ".png");
+		}
+
+		var sfwOptions = new ExportOptionsSaveForWeb();
+		sfwOptions.format = SaveDocumentType.PNG;
+		sfwOptions.includeProfile = false;
+		sfwOptions.interlaced = 0;
+		sfwOptions.optimized = true;
+		sfwOptions.quality = 100;
+		sfwOptions.PNG8 = false;
+
+		// Export the layer as a PNG
+		activeDocument.exportDocument(saveFile, ExportType.SAVEFORWEB, sfwOptions);
+
+		tempDoc.activeHistoryState = tempDoc.historyStates[tempDoc.historyStates.length - 1];
 	}
-
-	// alert(docFolder);
-
-	var saveFile = File(docFolder + "/" + tempDocName + ".png");
-	var i = 0;
-	while (saveFile.exists) {
-		i++;
-		saveFile = File(docFolder + "/" + tempDocName + "_" + i + ".png");
-	}
-
-	var sfwOptions = new ExportOptionsSaveForWeb();
-	sfwOptions.format = SaveDocumentType.PNG;
-	sfwOptions.includeProfile = false;
-	sfwOptions.interlaced = 0;
-	sfwOptions.optimized = true;
-	sfwOptions.quality = 100;
-	sfwOptions.PNG8 = false;
-
-	// Export the layer as a PNG
-	activeDocument.exportDocument(saveFile, ExportType.SAVEFORWEB, sfwOptions);
 
 	// Close the document without saving
 	activeDocument.close(SaveOptions.DONOTSAVECHANGES);
