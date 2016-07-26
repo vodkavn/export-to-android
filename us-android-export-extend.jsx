@@ -207,8 +207,8 @@ function isDocumentNew(doc) {
 };
 
 function resizeDoc(document, resolution) {
-	var calcWidth = activeLayer.bounds[2] - activeLayer.bounds[0], // Get layer's width
-	calcHeight = activeLayer.bounds[3] - activeLayer.bounds[1]; // Get layer's height
+	var calcWidth = document.activeLayer.bounds[2] - document.activeLayer.bounds[0], // Get layer's width
+	calcHeight = document.activeLayer.bounds[3] - document.activeLayer.bounds[1]; // Get layer's height
 
 	var newWidth = Math.floor(calcWidth * resolutionsObj[size][resolution].density);
 	var newHeight = Math.floor(calcHeight * resolutionsObj[size][resolution].density);
@@ -319,8 +319,8 @@ function saveFunc(_activeLayer, _directory, _filename) {
 		// Export the layer as a PNG
 		activeDocument.exportDocument(saveFile, ExportType.SAVEFORWEB, sfwOptions);
 
-		// History back 1 level (before resize)
-		tempDoc.activeHistoryState = tempDoc.historyStates[tempDoc.historyStates.length - 1];
+		// History back 2 level (before resize)
+		tempDoc.activeHistoryState = tempDoc.historyStates[tempDoc.historyStates.length - 2];
 	}
 
 	// Close the document without saving
