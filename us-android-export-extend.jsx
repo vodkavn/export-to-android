@@ -1,4 +1,4 @@
-﻿/*!
+/*!
  * Android Assets for Photoshop
  * =============================
  *
@@ -129,12 +129,12 @@ function init() {
 	if (!isDocumentNew()) {
 		for (resolution in resolutionsObj[size]) {
 			//try {
-				if (mode == "2")
-					scanLayerSets(app.activeDocument, resolution, app.activeDocument.name); // export all
-				else if (mode == "1")
-					scanLayerSets(activeLayer, resolution, activeLayer.name); // export selected layer recursively
-				else
-					return;
+			if (mode == "2")
+				scanLayerSets(app.activeDocument, resolution, app.activeDocument.name); // export all
+			else if (mode == "1")
+				scanLayerSets(activeLayer, resolution, activeLayer.name); // export selected layer recursively
+			else
+				return;
 			//} catch (error) {}
 		}
 	} else {
@@ -240,7 +240,7 @@ function resizeLayer(newWidth) {
 }
 
 function dupToNewFile(_activeLayer, includeInvisibleObject) {
-	
+
 	if (includeInvisibleObject) {
 		var fileName = _activeLayer.name.replace(/\.[^\.]+$/, ''),
 		calcWidth = Math.ceil(_activeLayer.bounds[2] - _activeLayer.bounds[0]),
@@ -248,14 +248,14 @@ function dupToNewFile(_activeLayer, includeInvisibleObject) {
 		docResolution = docRef.resolution,
 		document = app.documents.add(calcWidth, calcHeight, docResolution, fileName, NewDocumentMode.RGB,
 				DocumentFill.TRANSPARENT);
-				
+
 		app.activeDocument = docRef;
 
 		// Duplicated selection to a temp document
 		_activeLayer.duplicate(document, ElementPlacement.INSIDE);
 	} else {
 		var fileName = _activeLayer.name.replace(/\.[^\.]+$/, ''),
-		_tempLayer  = _activeLayer.duplicate().merge(), // duplicate and merge layer to get actual visible bounds
+		_tempLayer = _activeLayer.duplicate().merge(), // duplicate and merge layer to get actual visible bounds
 		calcWidth = Math.ceil(_tempLayer.bounds[2] - _tempLayer.bounds[0]),
 		calcHeight = Math.ceil(_tempLayer.bounds[3] - _tempLayer.bounds[1]),
 		docResolution = docRef.resolution,
