@@ -130,9 +130,9 @@ function init() {
 		for (resolution in resolutionsObj[size]) {
 			//try {
 			if (mode == "2")
-				scanLayerSets(app.activeDocument, resolution, app.activeDocument.name); // export all
+				scanLayerSets(app.activeDocument, resolution, "", app.activeDocument.name); // export all
 			else if (mode == "1")
-				scanLayerSets(activeLayer, resolution, activeLayer.name); // export selected layer recursively
+				scanLayerSets(activeLayer, resolution, "", activeLayer.name); // export selected layer recursively
 			else
 				return;
 			//} catch (error) {}
@@ -143,12 +143,13 @@ function init() {
 
 	// restore old ruler unit settings
 	app.preferences.rulerUnits = ru;
+	alert("Export finished!");
 }
 
 function selectMode() {
-	var m = prompt("Please enter your mode."
+	var m = prompt("Please enter your export mode:"
 			 + "\n  1 = Current layer and sub-layers"
-			 + "\n  2 = All layers", "");
+			 + "\n  2 = All layers", "1");
 	if (m == null)
 		return null;
 	if (m != "1" && m != "2")
@@ -158,10 +159,10 @@ function selectMode() {
 
 function selectSize() {
 	var sizeArray = ["1", "2", "3", "4", "5"];
-	var s = prompt("Please enter your current designed size."
+	var s = prompt("Please enter your current designed size:"
 			 + "\n  1 = mdpi       4 = xxhdpi"
 			 + "\n  2 = hdpi       5 = xxxhdpi"
-			 + "\n  3 = xhdpi", "");
+			 + "\n  3 = xhdpi", "3");
 	if (s == null)
 		return null;
 	if (s == "" || sizeArray.join(",").indexOf(s) == -1)
@@ -169,17 +170,17 @@ function selectSize() {
 	return s;
 }
 
-function scanLayerSets(_activeLayer, _resolution, _name) {
+function scanLayerSets(_activeLayer, _resolution, _directory, _filename) {
 	// alert("Total subgroup = " + _activeLayer.layerSets.length);
 	if (_activeLayer.layerSets.length > 0) {
 		// recursive
 		for (var a = 0; a < _activeLayer.layerSets.length; a++) {
-			scanLayerSets(_activeLayer.layerSets[a], _resolution, _name + "_" + _activeLayer.layerSets[a].name);
+			scanLayerSets(_activeLayer.layerSets[a], _resolution, _directory + "/" + _filename, _activeLayer.layerSets[a].name);
 		}
 	} else {
 		// export active layer
 		if (_activeLayer.visible)
-			saveFunc(_activeLayer, _resolution, _name);
+			saveFunc(_activeLayer, _resolution, _directory, _filename);
 	}
 }
 
@@ -283,15 +284,17 @@ function dupToNewFile(_activeLayer, includeInvisibleObject) {
 	activeLayer2.translate(-activeLayer2.bounds[0], -activeLayer2.bounds[1]);
 }
 
-function saveFunc(_activeLayer, _resolution, _name) {
+function saveFunc(_activeLayer, _resolution, _directory, _filename) {
 	dupToNewFile(_activeLayer, false);
 
 	var tempDoc = app.activeDocument;
 
 	resizeDoc(tempDoc, _resolution);
 
-	var tempDocName = _name.replace(/\s+/g, '').toLowerCase(), // Remove Space only and Lower Case
-	docFolder = Folder(docPath + '/' + docName + '-assets/' + 'drawable-' + _resolution);
+	var tempDocName = _filename.replace(/\s+/g, '_').toLowerCase(); // Remove Space only and Lower Case
+
+	//var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution + "/" + _directory.replace(/\s+/g, '_').toLowerCase());
+	var docFolder = Folder(docPath + "/" + docName + "-assets/" + "drawable-" + _resolution);
 
 	if (!docFolder.exists) {
 		docFolder.create();
@@ -300,6 +303,11 @@ function saveFunc(_activeLayer, _resolution, _name) {
 	// alert(docFolder);
 
 	var saveFile = File(docFolder + "/" + tempDocName + ".png");
+	var i = 0;
+	while (saveFile.exists) {
+		i++;
+		saveFile = File(docFolder + "/" + tempDocName + "_" + i + ".png");
+	}
 
 	var sfwOptions = new ExportOptionsSaveForWeb();
 	sfwOptions.format = SaveDocumentType.PNG;
