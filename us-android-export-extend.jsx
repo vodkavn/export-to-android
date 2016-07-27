@@ -177,7 +177,8 @@ function scanLayerSets(_activeLayer, _directory, _filename) {
 		}
 	} else {
 		// Export active layer
-		if (_activeLayer.visible)
+		//if (_activeLayer.visible)
+		if (_activeLayer.name.indexOf("@") > -1 || _activeLayer.name.indexOf("#") > -1)
 			saveFunc(_activeLayer, _directory, _filename);
 	}
 }
@@ -286,7 +287,13 @@ function saveFunc(_activeLayer, _directory, _filename) {
 
 	var tempDoc = app.activeDocument;
 
-	var tempDocName = _filename.replace(/\s+/g, '_').toLowerCase(); // Remove Space only and Lower Case
+	var format = _filename.indexOf('#') > -1 ? ".jpg" : ".png";
+
+	var tempDocName = _filename
+		.replace(/\s+/g, '_')
+		.replace('@', '')
+		.replace('#', '')
+		.toLowerCase(); // Remove Space only and Lower Case
 
 	for (_resolution in resolutionsObj[size]) {
 		// Resize layer
@@ -301,20 +308,21 @@ function saveFunc(_activeLayer, _directory, _filename) {
 
 		// alert(docFolder);
 
-		var saveFile = File(docFolder + "/" + tempDocName + ".png");
+		var saveFile = File(docFolder + "/" + tempDocName + format);
 		var i = 0;
 		while (saveFile.exists) {
 			i++;
-			saveFile = File(docFolder + "/" + tempDocName + "_" + i + ".png");
+			saveFile = File(docFolder + "/" + tempDocName + "_" + i + format);
 		}
 
 		var sfwOptions = new ExportOptionsSaveForWeb();
-		sfwOptions.format = SaveDocumentType.PNG;
+		sfwOptions.format = format == ".png" ? SaveDocumentType.PNG : SaveDocumentType.JPEG;
 		sfwOptions.includeProfile = false;
 		sfwOptions.interlaced = 0;
 		sfwOptions.optimized = true;
 		sfwOptions.quality = 100;
-		sfwOptions.PNG8 = false;
+		if (format == ".png")
+			sfwOptions.PNG8 = false;
 
 		// Export the layer as a PNG
 		activeDocument.exportDocument(saveFile, ExportType.SAVEFORWEB, sfwOptions);
