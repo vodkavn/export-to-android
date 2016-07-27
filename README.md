@@ -14,9 +14,13 @@ The script works by duplicating the selected layer (or layergroup) to a new docu
 	- PC 64bit: **C:\Program Files\Adobe\Adobe Photoshop... (64 Bit)\Presets\Scripts\**
 	- PC 32bit: **C:\Program Files\Adobe\Adobe Photoshop...\Presets\Scripts\**
 
+3. Add **@** or **#** to layer name to export image:
+
+	- @ for PNG
+	- # for JPEG
+
 
 ## Version Explanation
-
 The normal version is unchanged from its origin (Uncorked Studios).
 
 The extended version was customized with configuration screen and some tweaks to improve export time.
